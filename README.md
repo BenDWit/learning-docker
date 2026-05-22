@@ -1,4 +1,5 @@
 # Learning Docker
+https://git.evilwizards.online/momus/learning-docker
 
 This is a simple project with a small Python API that just checks uptime, which we then collect with Prometheus. The goal was to build a full environment with monitoring, a reverse proxy, and metrics.
 
