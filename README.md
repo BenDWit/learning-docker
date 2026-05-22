@@ -53,7 +53,8 @@ I also learned some best practices like multistage building, where you use `FROM
 
 Service DNS: every service name is resolvable by other hosts in the network.
 
-## what i want to learn next.
+## what i want to learn next:
+Second docker session planned where i will dig into these topics:
 - [ ] Resource limits
 - [ ] Logging
 - [ ] Override files
@@ -62,3 +63,5 @@ Service DNS: every service name is resolvable by other hosts in the network.
 - [ ] ARG vs ENV
 - [ ] image registries
 - [ ] security
+
+Also K8's writeup coming soon.s
