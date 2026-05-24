@@ -1,15 +1,16 @@
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+WORKDIR /app 
+COPY requirements.txt .
+RUN uv venv /app/.venv && uv pip install --no-cache-dir -r requirements.txt
 
+FROM python:3.13-slim
 WORKDIR /app
-
-COPY requirements.txt /app/. 
-RUN uv pip install --system --no-cache-dir -r requirements.txt
-
+COPY --from=builder /app/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+COPY api.py .
 
 RUN groupadd -r appgroup && useradd -r -g appgroup glad
 USER glad
-
-COPY api.py /app/.
 
 EXPOSE 3000
 CMD [ "uvicorn","api:app","--host","0.0.0.0","--port","3000" ]
