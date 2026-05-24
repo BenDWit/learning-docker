@@ -1,9 +1,12 @@
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+ARG PYTHON_VERSION="3.13-slim"
+
+
+FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim AS builder
 WORKDIR /app 
 COPY requirements.txt .
 RUN uv venv /app/.venv && uv pip install --no-cache-dir -r requirements.txt
 
-FROM python:3.13-slim
+FROM python:$PYTHON_VERSION
 WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
@@ -17,4 +20,5 @@ CMD [ "uvicorn","api:app","--host","0.0.0.0","--port","3000" ]
 
 
 HEALTHCHECK --interval=5m --timeout=3s \
-  CMD uv --version && curl http://127.0.0.1:3000 || exit 1
+  CMD uv --version && python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+
