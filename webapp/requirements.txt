@@ -1,5 +1,5 @@
 uvicorn
-fastapi 
-httpx 
+fastapi
+httpx
 asyncio
 prometheus_client
