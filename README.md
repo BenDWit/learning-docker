@@ -26,9 +26,29 @@ It's still basically Linux under the hood, so I added a user and a group, then s
 - `EXPOSE` documents what port this image will use.
 - `CMD` runs the app. This one matters you can't use `RUN` here, because `RUN` is only for the build stage. `CMD` is your deploy command.
 
+**Version Pinning:**
+
+I pinned the base images using SHA checksums instead of just tags. Tags can change under you — a SHA guarantees you're pulling the exact same image every time. Both the `uv` builder stage and the `python` runtime stage are pinned this way. I also used `ARG` to define the Python version so it's easy to change in one place.
+
+**Build Arguments:**
+
+Added `ARG` for things like the Python version. Mostly for testing right now — makes it easy to swap versions without editing the whole file.
+
+**Python Environment Variables:**
+
+Set `PYTHONUNBUFFERED=1` and `PYTHONDONTWRITEBYTECODE=1` for better container behavior. Unbuffered output means logs show up immediately (important for Docker logging), and skipping bytecode avoids writing `.pyc` files the container doesn't need.
+
 **Healthcheck:**
 
-I started with just `uv --version` as a healthcheck, then upgraded it to a `curl` against the running app to actually verify the deploy.
+Fixed the healthcheck — dropped the `uv --version` approach since `uv` isn't even in the runtime stage. Now it uses Python's `urllib` to hit the actual `/health` endpoint. Also shortened the interval and added a `--start-period` so Docker gives the app time to boot before marking it unhealthy.
+
+**Labels:**
+
+Added OCI labels for image metadata — title, description, version, source repo, author, and creation date. These are used by container registries and tools to identify and catalog images.
+
+**.dockerignore:**
+
+Added a `.dockerignore` to keep markdown files and `.env` out of the build context. No reason to upload docs into the image.
 
 
 # Docker Compose
@@ -61,8 +81,8 @@ Second docker session planned where i will dig into these topics:
 - [ ] Override files
 - [ ] profiles
 - [ ] prune/cleanup
-- [ ] ARG vs ENV
-- [ ] image registries
+- [x] ARG vs ENV
+- [x] image registries
 - [ ] security
 
-Also K8's writeup coming soon.s
+Also K8s writeup coming soon.

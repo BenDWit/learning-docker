@@ -1,24 +1,30 @@
-ARG PYTHON_VERSION="3.13-slim"
+ARG PYTHON_VERSION="3.13-slim@sha256:b04b5d7233d2ad9c379e22ea8927cd1378cd15c60d4ef876c065b25ea8fb3bf3" 
 
-
-FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.13-trixite-slim@sha256:8cf4c921a02b30af0e62b00991dae04aee12b28f50e64051bcf65772d8d46383  AS builder
 WORKDIR /app 
 COPY requirements.txt .
 RUN uv venv /app/.venv && uv pip install --no-cache-dir -r requirements.txt
 
 FROM python:$PYTHON_VERSION
+LABEL org.opencontainers.image.title="uptimeapp"
+LABEL org.opencontainers.image.description="FastAPI health checker for learning docker"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.source="https://github.com/BenDWit/learning-docker"
+LABEL org.opencontainers.image.authors="momus"
+LABEL org.opencontainers.image.created="2026-05-25"
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+
 WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
-ENV PATH="/app/.venv/bin:$PATH"
 COPY api.py .
-
 RUN groupadd -r appgroup && useradd -r -g appgroup glad
 USER glad
 
 EXPOSE 3000
 CMD [ "uvicorn","api:app","--host","0.0.0.0","--port","3000" ]
-
-
-HEALTHCHECK --interval=5m --timeout=3s \
-  CMD uv --version && python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+HEALTHCHECK --start-period=10s --interval=30s --timeout=3s \
+  CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:3000/health')" || exit 1
 
